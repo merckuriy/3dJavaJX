@@ -3,6 +3,7 @@ package sample;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.*;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.Sphere;
 import javafx.stage.Stage;
@@ -30,8 +31,9 @@ public class Main extends Application {
         PointLight light = new PointLight();
         light.setTranslateZ(-80);
 
-        Group root = new Group(sphere, light);
+        Group root = new Group(sphere, light); //Doesn't bind keyEvent to root.
         Scene scene = new Scene(root, 400, 300, true);
+        scene.setOnKeyPressed(this::keyHandler);
 
         // Установка камеры для обзора трехмерных фигур
         PerspectiveCamera camera = new PerspectiveCamera(false);
@@ -44,6 +46,25 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+
+    private void keyHandler(KeyEvent keyEvent) {
+        switch(keyEvent.getCode()){
+            case LEFT:
+                System.out.println("Left"); break;
+            case RIGHT:
+                System.out.println("Right"); break;
+            case UP:
+                System.out.println("Up"); break;
+            case DOWN:
+                System.out.println("Down"); break;
+            case W:
+                System.out.println("W"); break;
+            case S:
+                System.out.println("S"); break;
+        }
+    }
+
+
 
 
     public static void main(String[] args) {
