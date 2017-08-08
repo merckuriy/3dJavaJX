@@ -23,13 +23,11 @@ public class Main extends Application {
         //sphere.setTranslateY(-5);
         //sphere.setTranslateZ(400);
         sphere.setTranslateX(300);
-        sphere.setTranslateY(100);
+        sphere.setTranslateY(110);
         sphere.setTranslateZ(50);
 
         // Точка освещения
         PointLight light = new PointLight();
-        //light.setTranslateX(350);
-        //light.setTranslateY(100);
         light.setTranslateZ(-80);
 
         Group root = new Group(sphere, light);
