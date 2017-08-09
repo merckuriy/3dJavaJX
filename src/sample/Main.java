@@ -67,11 +67,11 @@ public class Main extends Application
                 break;
             case UP:
                 camera.setTranslateZ(camera.getTranslateZ()+5);
-                System.out.println("Z:" + camera.getTranslateZ());
+                System.out.println("Z: " + camera.getTranslateZ());
                 break;
             case DOWN:
                 camera.setTranslateZ(camera.getTranslateZ()-5);
-                System.out.println("Z:" + camera.getTranslateZ());
+                System.out.println("Z: " + camera.getTranslateZ());
                 break;
             case W:
                 rotateX.setAngle(rotateX.getAngle() - 5);
