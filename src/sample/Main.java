@@ -2,27 +2,31 @@ package sample;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Point3D;
 import javafx.scene.*;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.Sphere;
+import javafx.scene.transform.Rotate;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+
+
+public class Main extends Application
+{
+    private PerspectiveCamera camera;
+    private Rotate rotateY, rotateX;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        //Узнать про fxml позже, после Git
         //Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        Box box = new Box(100, 100, 100);
-        //box.setTranslateX(150);
-        box.setTranslateY(0);
-        //box.setTranslateZ(400);
+        Box box = new Box(20, 20, 20); //100, 100, 100
+        box.setMaterial(new PhongMaterial(Color.BLUE)); //3D Color set through material
 
         Sphere sphere = new Sphere(50);
-        //sphere.setTranslateX(300);
-        //sphere.setTranslateY(-5);
-        //sphere.setTranslateZ(400);
+        sphere.setMaterial(new PhongMaterial(Color.RED));
         sphere.setTranslateX(300);
         sphere.setTranslateY(110);
         sphere.setTranslateZ(50);
@@ -31,15 +35,18 @@ public class Main extends Application {
         PointLight light = new PointLight();
         light.setTranslateZ(-80);
 
-        Group root = new Group(sphere, light); //Doesn't bind keyEvent to root.
+        Group root = new Group(sphere, box, light); //Doesn't bind keyEvent to root.
         Scene scene = new Scene(root, 400, 300, true);
         scene.setOnKeyPressed(this::keyHandler);
 
         // Установка камеры для обзора трехмерных фигур
-        PerspectiveCamera camera = new PerspectiveCamera(false);
-        camera.setTranslateX(100);
-        camera.setTranslateY(-50);
-        camera.setTranslateZ(300);
+        // default: FieldOfView = 30. the larger fov, the more distortion.
+        // NearClip = 0.1, FarClip = 100.0
+        camera = new PerspectiveCamera(true); //def: false
+        camera.setTranslateZ(-80); //300
+        camera.setFarClip(10000);
+        camera.getTransforms().addAll(rotateX = new Rotate(0, Rotate.X_AXIS), rotateY = new Rotate(0, Rotate.Y_AXIS));
+
         scene.setCamera(camera);
 
         primaryStage.setTitle("3D JavaFX");
@@ -48,23 +55,34 @@ public class Main extends Application {
     }
 
     private void keyHandler(KeyEvent keyEvent) {
+
         switch(keyEvent.getCode()){
             case LEFT:
-                System.out.println("Left"); break;
+                rotateY.setAngle(rotateY.getAngle() - 1);
+                System.out.println("Y angle: "+ rotateY.getAngle()%360);
+                break;
             case RIGHT:
-                System.out.println("Right"); break;
+                rotateY.setAngle(rotateY.getAngle() + 1);
+                System.out.println("Y angle: "+ rotateY.getAngle()%360);
+                break;
             case UP:
-                System.out.println("Up"); break;
+                camera.setTranslateZ(camera.getTranslateZ()+5);
+                System.out.println(camera.getTranslateZ());
+                break;
             case DOWN:
-                System.out.println("Down"); break;
+                camera.setTranslateZ(camera.getTranslateZ()-5);
+                System.out.println("Z:" + camera.getTranslateZ());
+                break;
             case W:
-                System.out.println("W"); break;
+                rotateX.setAngle(rotateX.getAngle() - 5);
+                System.out.println("X angle: "+ rotateX.getAngle()%360);
+                break;
             case S:
-                System.out.println("S"); break;
+                rotateX.setAngle(rotateX.getAngle() + 5);
+                System.out.println("X angle: "+ rotateX.getAngle()%360);
+                break;
         }
     }
-
-
 
 
     public static void main(String[] args) {
