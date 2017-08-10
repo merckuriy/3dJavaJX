@@ -9,8 +9,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Box;
 import javafx.scene.shape.Sphere;
-import javafx.scene.transform.Rotate;
-import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 
 
@@ -18,6 +16,8 @@ import javafx.stage.Stage;
 public class Main extends Application
 {
     private PerspectiveCamera camera;
+    // 2 solution (to store rotate separately) for yaw/pitch degrees limit problem
+    private double yaw = 0d, pitch = 0d, roll = 0d;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -28,7 +28,7 @@ public class Main extends Application
         Sphere sphere = new Sphere(50);
         sphere.setMaterial(new PhongMaterial(Color.RED));
         sphere.setTranslateX(300);
-        sphere.setTranslateY(110);
+        sphere.setTranslateY(40);
         sphere.setTranslateZ(50);
 
         // Точка освещения
@@ -48,8 +48,6 @@ public class Main extends Application
 
         scene.setCamera(camera);
 
-        System.out.println(camera.getLocalToSceneTransform());
-
         primaryStage.setTitle("3D JavaFX");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -59,18 +57,12 @@ public class Main extends Application
 
         switch(keyEvent.getCode()){
             case LEFT:
-                addRotate(camera, 0, 0, 5);
-                System.out.printf("Yaw angle: %.0f°\n", Math.toDegrees(getYaw(camera)));
-
-                //rotateY.setAngle(rotateY.getAngle() - 1);
-                //System.out.println("Y angle: "+ rotateY.getAngle()%360);
+                addRotate(camera, 0, -5, 0);
+                System.out.printf("Yaw angle: %.0f°\n", yaw);
                 break;
             case RIGHT:
-                addRotate(camera, 0, 0, -5);
-                System.out.printf("Yaw angle: %.0f°\n", Math.toDegrees(getYaw(camera)));
-
-                //rotateY.setAngle(rotateY.getAngle() + 1);
-                //System.out.println("Y angle: "+ rotateY.getAngle()%360);
+                addRotate(camera, 0, 5, 0);
+                System.out.printf("Yaw angle: %.0f°\n", yaw);
                 break;
             case UP: {
                 //camera.setTranslateZ(camera.getTranslateZ()+5);
@@ -98,60 +90,77 @@ public class Main extends Application
 
                 System.out.println("X:" + camera.getTranslateX()+ " |Z:" + camera.getTranslateZ()+ " |Y:" + camera.getTranslateY());
             } break;
-            case W: {
-//                rotateX.setAngle(rotateX.getAngle() + 5);
-                addRotate(camera, 0, -5, 0);
-                System.out.printf("Pitch angle: %.0f°\n", Math.toDegrees(getPitch(camera)));
-            } break;
-            case S: {
-//                rotateX.setAngle(rotateX.getAngle() - 5);
-
-                addRotate(camera, 0, 5, 0);
-                System.out.printf("Pitch angle: %.0f°\n", Math.toDegrees(getPitch(camera)));
-            }break;
+            case W:
+                addRotate(camera, 0, 0, 5);
+                System.out.printf("Pitch angle: %.0f°\n", pitch);
+                break;
+            case S:
+                addRotate(camera, 0, 0, -5);
+                System.out.printf("Pitch angle: %.0f°\n", pitch);
+                break;
+            // Roll doesn't work properly
+            case Q:
+                addRotate(camera, -5, 0, 0);
+                System.out.printf("Roll angle: %.0f°\n", roll);
+                break;
+            case E:
+                addRotate(camera, 5, 0, 0);
+                System.out.printf("Roll angle: %.0f°\n", roll);
+                break;
         }
     }
 
-    // Adapted José Pereda solution.
-    private double getPitch(Node n){
-        Transform T = n.getLocalToSceneTransform();
-        return Math.atan2(-T.getMzy(), T.getMzz());
-    }
+    //getPitch, getYaw, getRoll doesn't determine angle correctly, not used.
+//    private double getPitch(Node n){
+//        Transform T = n.getLocalToSceneTransform();
+//        // -Math.acos(T.getMyy())
+//        double p = Math.atan2(T.getMzy(),T.getMzz()); //f, roll(old) = pitch (new)
+//        // simple workaround for yaw > 90 strange behavior
+//        return p==Math.PI ? 0d : p;
+//    }
+//
+//    private double getYaw(Node n){
+//        Transform T = n.getLocalToSceneTransform();
+//        double y = Math.atan2(-T.getMzx(),Math.sqrt(T.getMzy()*T.getMzy()+T.getMzz()*T.getMzz())); //0, pitch(old) = yaw (new)
+//
+//        // workaround for yaw > 90.
+//        if(T.getMzz() < 0){
+//            return (y<0?-Math.PI : Math.PI) - y;
+//        } else return y;
+//    }
+//
+//    private double getRoll(Node n){
+//        Transform T = n.getLocalToSceneTransform();
+//        return Math.atan2(T.getMyx(),T.getMxx()); //w, yaw(old) = roll (new)
+//    }
 
-    private double getRoll(Node n){
-        Transform T = n.getLocalToSceneTransform();
-        return Math.atan2(-T.getMyx(), T.getMxx());
-    }
-
-    private double getYaw(Node n){
-        Transform T = n.getLocalToSceneTransform();
-        return Math.atan2(T.getMzx(), Math.sqrt(T.getMzy() * T.getMzy() + T.getMzz() * T.getMzz()));
-    }
-
-    // input in degree
+    // angle in degree
+    // alf: roll (z), bet: yaw (y), gam: pitch (x)
     private void addRotate(Node n, double alf, double bet, double gam){
-        matrixRotateNode(n, getRoll(n) + Math.toRadians(alf), getPitch(n) + Math.toRadians(bet), getYaw(n) + Math.toRadians(gam));
+        matrixRotateNode(n, Math.toRadians(roll+=alf), Math.toRadians(yaw+=bet), Math.toRadians(pitch+=gam));
     }
 
-    //alf - roll (z), bet - pitch (x), gam - yaw (y).
+    //alf: roll (z), bet: yaw (y), gam: pitch (x) - for y-down system (javaFX default).
+    //alf: yaw, bet: pitch, gam: roll (doesn't work properly) - for right-hand system.
+    // en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions#Conversion_formulae_between_formalisms
+    // angle in radian
     private void matrixRotateNode(Node n, double alf, double bet, double gam){
-        double A11=Math.cos(alf)*Math.cos(gam);
-        double A12=Math.cos(bet)*Math.sin(alf)+Math.cos(alf)*Math.sin(bet)*Math.sin(gam);
-        double A13=Math.sin(alf)*Math.sin(bet)-Math.cos(alf)*Math.cos(bet)*Math.sin(gam);
-        double A21=-Math.cos(gam)*Math.sin(alf);
-        double A22=Math.cos(alf)*Math.cos(bet)-Math.sin(alf)*Math.sin(bet)*Math.sin(gam);
-        double A23=Math.cos(alf)*Math.sin(bet)+Math.cos(bet)*Math.sin(alf)*Math.sin(gam);
-        double A31=Math.sin(gam);
-        double A32=-Math.cos(gam)*Math.sin(bet);
+        double A11=Math.cos(alf)*Math.cos(bet);
+        double A12=Math.cos(alf)*Math.sin(bet)*Math.sin(gam)-Math.sin(alf)*Math.cos(gam);
+        double A13=Math.cos(alf)*Math.sin(bet)*Math.cos(gam)+Math.sin(alf)*Math.sin(gam);
+        double A21=Math.sin(alf)*Math.cos(bet);
+        double A22=Math.sin(alf)*Math.sin(bet)*Math.sin(gam)+Math.cos(alf)*Math.cos(gam);
+        double A23=Math.sin(alf)*Math.sin(bet)*Math.cos(gam)-Math.cos(alf)*Math.sin(gam);
+        double A31=-Math.sin(bet);
+        double A32=Math.cos(bet)*Math.sin(gam);
         double A33=Math.cos(bet)*Math.cos(gam);
 
         double d = Math.acos((A11+A22+A33-1d)/2d);
-        double den=2d*Math.sin(d);
-        Point3D p= new Point3D((A32-A23)/den,(A13-A31)/den,(A21-A12)/den);
+        double den = 2d*Math.sin(d);
+        Point3D p = new Point3D((A32-A23)/den,(A13-A31)/den,(A21-A12)/den);
         n.setRotationAxis(p);
         n.setRotate(Math.toDegrees(d));
     }
-
 
 
     public static void main(String[] args) {
