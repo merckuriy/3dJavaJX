@@ -12,6 +12,7 @@ import javafx.stage.Stage;
 
 import java.util.Locale;
 
+// Keep "down" key
 
 public class Main extends Application
 {
@@ -20,14 +21,16 @@ public class Main extends Application
     // yaw - isn't yaw but precession (прецессия), pitch isn't pitch but nutation (нутация).
     // It's means that body doesn't rotate around itself.
     private double yaw = 0d, pitch = 0d, roll = 0d;
-    private double rotate = 5, step = 5;
+    private double rotate = 5;
+    private double step = 3;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
 
         Locale.setDefault(Locale.US);
-        Box box = new Box(20, 20, 20); //100, 100, 100
+        Box box = new Box(5, 5, 5); //100, 100, 100
         box.setMaterial(new PhongMaterial(Color.BLUE)); //3D Color set through material
+        box.setTranslateZ(15);
 
         Sphere sphere = new Sphere(50);
         sphere.setMaterial(new PhongMaterial(Color.RED));
@@ -35,19 +38,49 @@ public class Main extends Application
         sphere.setTranslateY(40);
         sphere.setTranslateZ(50);
 
+        Sphere sph2 = new Sphere(40);
+        sph2.setMaterial(new PhongMaterial(Color.GREEN));
+        sph2.setTranslateX(50);
+        sph2.setTranslateY(0);
+        sph2.setTranslateZ(-400);
+
+        Sphere sph3 = new Sphere(200);
+        sph3.setMaterial(new PhongMaterial(Color.ORANGE));
+        sph3.setTranslateX(-220);
+        sph3.setTranslateY(0);
+        sph3.setTranslateZ(-900);
+
+        Sphere sph4 = new Sphere(1200);
+        sph4.setMaterial(new PhongMaterial(Color.BROWN));
+        sph4.setTranslateX(850);
+        sph4.setTranslateY(-850);
+        sph4.setTranslateZ(-2200);
+
+        Sphere sph5 = new Sphere(10000);
+        sph5.setMaterial(new PhongMaterial(Color.GOLD));
+        sph5.setTranslateX(-8650);
+        sph5.setTranslateY(-5000);
+        sph5.setTranslateZ(-14000);
+
+        Sphere sph6 = new Sphere(400000);
+        sph6.setMaterial(new PhongMaterial(Color.AQUA));
+        sph6.setTranslateX(-345950);
+        sph6.setTranslateY(200000);
+        sph6.setTranslateZ(-150000);
+
         // Точка освещения
         PointLight light = new PointLight();
         light.setTranslateZ(-80);
 
-        Group root = new Group(sphere, box, light); //can't bind keyEvent to root.
+        Group root = new Group(sph2, sph3, sph4, sph5, sph6, box); //can't bind keyEvent to root.
         Scene scene = new Scene(root, 400, 300, true);
         scene.setOnKeyPressed(this::keyHandler);
 
         // default: FieldOfView = 30. the larger FOV, the more distortion.
         // NearClip = 0.1, FarClip = 100.0
         camera = new PerspectiveCamera(true); //def: false
-        camera.setTranslateZ(-80); //300
-        camera.setFarClip(10000);
+        camera.setTranslateZ(0);
+        camera.setFarClip(10000000);
 
         scene.setCamera(camera);
 
@@ -107,6 +140,14 @@ public class Main extends Application
             case E:
                 addRotate(camera, rotate, 0, 0);
                 System.out.printf("Roll angle: %.0f°\n", roll);
+                break;
+            case SHIFT:
+                step *= 4;
+                System.out.printf("Speed x4. Current speed: %.0f\n", step);
+                break;
+            case CONTROL:
+                step /= 4;
+                System.out.printf("Speed down /4. Current speed: %.0f\n", step);
                 break;
         }
     }
